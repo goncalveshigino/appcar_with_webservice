@@ -1,0 +1,2 @@
+
+const PRIMARY_COLOR = 0xff615AAB;
