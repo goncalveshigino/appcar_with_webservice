@@ -7,8 +7,10 @@ import 'package:flutter/material.dart';
 
 import 'carro_page.dart';
 import 'carros.dart';
+import 'carros_bloc.dart';
 
 class CarrosListView extends StatefulWidget {
+  
   CarrosListView(this.tipo);
 
   String tipo;
@@ -21,7 +23,9 @@ class _CarrosListViewState extends State<CarrosListView>
     with AutomaticKeepAliveClientMixin {
   List<Carro> carros;
 
-  final _streamController = StreamController<List<Carro>>();
+  String get tipo => widget.tipo;
+
+  final _bloc = CarrosBloc();
 
   @override
   bool get wantKeepAlive => true;
@@ -29,13 +33,7 @@ class _CarrosListViewState extends State<CarrosListView>
   void initState() {
     super.initState();
 
-    _loadingCarros();
-  }
-
-  _loadingCarros() async {
-    List<Carro> carros = await CarrosApi.getCarros(widget.tipo);
-
-    _streamController.add(carros);
+    _bloc.loadingCarros(tipo);
   }
 
   @override
@@ -43,7 +41,7 @@ class _CarrosListViewState extends State<CarrosListView>
     super.build(context);
 
     return StreamBuilder(
-      stream: _streamController.stream,
+      stream: _bloc.carros,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
@@ -120,5 +118,12 @@ class _CarrosListViewState extends State<CarrosListView>
 
   _onClickDetails(Carro c) {
     push(context, CarroPage(c));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    _bloc.dispose();
   }
 }
