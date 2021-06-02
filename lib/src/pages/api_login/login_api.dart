@@ -2,48 +2,42 @@ import 'dart:convert';
 
 import 'package:carros/src/pages/api_login/api_response.dart';
 import 'package:carros/src/pages/user/user.dart';
+import 'package:carros/src/util/prefs.dart';
 import 'package:http/http.dart' as http;
 
-
 class LoginApi {
-
   static Future<ApiResponse<User>> login(String login, String password) async {
+    try {
+      var url = 'https://carros-springboot.herokuapp.com/api/v2/login';
 
-     try {
+      Map<String, String> headers = {"Content-Type": "application/json"};
 
-        var url = 'https://carros-springboot.herokuapp.com/api/v2/login';
+      Map params = {"username": login, "password": password};
 
-        Map<String, String> headers = {
-          "Content-Type": "application/json"
-        };
+      String s = json.encode(params);
 
-        Map params = {
-          "username": login, 
-          "password": password
-        };
+      print('>> $s');
 
-        String s = json.encode(params);
+      var response = await http.post(url, body: s, headers: headers);
 
-        print('>> $s');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
-        var response = await http.post(url, body: s, headers: headers );
+      Map mapResponse = json.decode(response.body);
 
-        print('Response status: ${response.statusCode}');
-        print('Response body: ${response.body}'); 
+      if (response.statusCode == 200) {
+        final user = User.fromJson(mapResponse);
 
-        Map mapResponse = json.decode(response.body);
+        user.save();
+        
 
-        if(response.statusCode == 200) {
-            final user = User.fromJson(mapResponse);
-            return ApiResponse.ok(user);
-        }
-      
+        return ApiResponse.ok(user);
+      }
+
       return ApiResponse.error(mapResponse["error"]);
-       
-     } catch (error, exception) {
-        print("Erro no login $error > $exception");
-        return ApiResponse.error("Nao foi possivel fazer o login");
-     }
+    } catch (error, exception) {
+      print("Erro no login $error > $exception");
+      return ApiResponse.error("Nao foi possivel fazer o login");
+    }
   }
-
 }
