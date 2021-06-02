@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Color(0xff615AAB)
       ),
-      title: 'Material App',
+
       home: LoginPage()
     );
   }
