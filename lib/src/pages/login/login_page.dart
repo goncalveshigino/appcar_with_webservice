@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:carros/src/pages/api_login/api_response.dart';
 import 'package:carros/src/pages/api_login/login_api.dart';
 import 'package:carros/src/pages/home/home_page.dart';
@@ -8,7 +10,7 @@ import 'package:carros/src/widget/appButton.dart';
 import 'package:carros/src/widget/appTextForm.dart';
 import 'package:carros/src/widget/const.dart';
 import 'package:flutter/material.dart';
- 
+
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -17,13 +19,13 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
+  final _streamController = StreamController<bool>();
+
   final _tLogin = TextEditingController();
 
   final _tPassword = TextEditingController();
 
   final _focusPassword = FocusNode();
-
-  bool _showProgress = false;
 
   @override
   void initState() {
@@ -32,8 +34,7 @@ class _LoginPageState extends State<LoginPage> {
     // Mostrar dados do ultimo usuario logado
     Future<User> future = User.get();
     future.then((User user) {
-      if(user != null)
-       push(context, HomePage(), replace: true);
+      if (user != null) push(context, HomePage(), replace: true);
       // setState(() {
       //   _tLogin.text = user.login;
       // });
@@ -84,10 +85,15 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(
                 height: 15,
               ),
-              AppButton(
-                'Login',
-                onPressed: _onClickLogin,
-                showProgress: _showProgress,
+              StreamBuilder<bool>(
+                stream: _streamController.stream,
+                builder: (context, snapshot) {
+                  return AppButton(
+                    'Login',
+                    onPressed: _onClickLogin,
+                    showProgress: snapshot.data ?? false,
+                  );
+                },
               )
             ],
           ),
@@ -106,9 +112,7 @@ class _LoginPageState extends State<LoginPage> {
 
     print("login: $login, password: $password");
 
-    setState(() {
-      _showProgress = true;
-    });
+    _streamController.add(true);
 
     ApiResponse response = await LoginApi.login(login, password);
 
@@ -121,10 +125,8 @@ class _LoginPageState extends State<LoginPage> {
     } else {
       alert(context, response.msg);
     }
-    
-    setState(() {
-      _showProgress = false;
-    });
+
+    _streamController.add(false);
   }
 
   String _validateLogin(String value) {
@@ -140,5 +142,12 @@ class _LoginPageState extends State<LoginPage> {
       return 'A senha precisa ter pelo menus 3 números';
     }
     return null;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    _streamController.close();
   }
 }
