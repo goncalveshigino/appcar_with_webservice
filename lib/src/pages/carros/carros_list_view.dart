@@ -3,14 +3,16 @@ import 'dart:async';
 import 'package:carros/src/pages/carros/carros_api.dart';
 import 'package:carros/src/util/nav.dart';
 import 'package:carros/src/widget/const.dart';
+import 'package:carros/src/widget/text_error.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 
 import 'carro_page.dart';
 import 'carros.dart';
-import 'carros_bloc.dart';
+import 'carros_model.dart';
+
 
 class CarrosListView extends StatefulWidget {
-  
   CarrosListView(this.tipo);
 
   String tipo;
@@ -25,7 +27,7 @@ class _CarrosListViewState extends State<CarrosListView>
 
   String get tipo => widget.tipo;
 
-  final _bloc = CarrosBloc();
+  final _model = CarrosModel();
 
   @override
   bool get wantKeepAlive => true;
@@ -33,30 +35,34 @@ class _CarrosListViewState extends State<CarrosListView>
   void initState() {
     super.initState();
 
-    _bloc.loadingCarros(tipo);
+   _loadingCarros();
+  }
+
+ void  _loadingCarros(){
+    _model.loadingCarros(tipo);
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
-    return StreamBuilder(
-      stream: _bloc.carros,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(
-            child:
-                Text('Erro ao carregar', style: TextStyle(color: Colors.red)),
-          );
+    return Observer( 
+      builder: (_) {
+
+        
+        List<Carro> carros = _model.carros;
+
+        if (_model.error != null) {
+          return TextError('Erro nao foi possivel buscar os carros\n\nClique aqui para tentar novamente',
+          onPressed: _loadingCarros);
         }
 
-        if (!snapshot.hasData) {
+        if (carros == null) {
           return Center(
             child: CircularProgressIndicator(),
           );
         }
 
-        List<Carro> carros = snapshot.data;
         return _listView(carros);
       },
     );
@@ -120,10 +126,5 @@ class _CarrosListViewState extends State<CarrosListView>
     push(context, CarroPage(c));
   }
 
-  @override
-  void dispose() {
-    super.dispose();
 
-    _bloc.dispose();
-  }
 }
