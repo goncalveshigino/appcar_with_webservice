@@ -52,9 +52,9 @@ class _HomePageState extends State<HomePage>
       body: TabBarView(
         controller: _tabController,
         children: [
-          CarrosListView(TipoCarro.classicos),
-          CarrosListView(TipoCarro.esportivos),
-          CarrosListView(TipoCarro.luxo)
+          CarrosPage(TipoCarro.classicos),
+          CarrosPage(TipoCarro.esportivos),
+          CarrosPage(TipoCarro.luxo)
         ],
       ),
       drawer: MeuDrawer(),
