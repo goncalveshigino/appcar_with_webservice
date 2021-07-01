@@ -1,17 +1,37 @@
+import 'package:carros/src/pages/carros/loripsum_api.dart';
 import 'package:flutter/material.dart';
 
 import 'carros.dart';
 
-class CarroPage extends StatelessWidget {
+class CarroPage extends StatefulWidget {
+
+
   CarroPage(this.carro);
 
   Carro carro;
 
   @override
+  _CarroPageState createState() => _CarroPageState();
+}
+
+class _CarroPageState extends State<CarroPage> {
+
+ final _loripsumApiBloc = LoripsumBloc(); 
+
+
+  @override
+  void initState() { 
+    super.initState();
+    
+   _loripsumApiBloc.fetch();
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(carro.nome),
+        title: Text(widget.carro.nome),
         centerTitle: true,
         actions: [
           IconButton(
@@ -54,9 +74,11 @@ class CarroPage extends StatelessWidget {
       child: ListView(
         scrollDirection: Axis.vertical,
         children: [
-          Image.network(carro.urlFoto), 
-          _bloco1(), 
-          SizedBox(height: 20,),
+          Image.network(widget.carro.urlFoto),
+          _bloco1(),
+          SizedBox(
+            height: 20,
+          ),
           _bloco2()
         ],
       ),
@@ -71,12 +93,12 @@ class CarroPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              carro.nome,
+              widget.carro.nome,
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               overflow: TextOverflow.ellipsis,
             ),
             Text(
-              carro.tipo,
+              widget.carro.tipo,
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
@@ -123,10 +145,31 @@ class CarroPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text( carro.descricao, style: TextStyle( fontSize: 16, fontWeight: FontWeight.w500)), 
-        SizedBox(height: 12,),
-        Text( 'hdhdhdddddddddddddddddddhfjhfjhfhjfhjfhjfhjfjhfhjfhjfjhfhjfjhfhjfjhfjhfjheuytetydeyteyteyte675e75e75etuydshgvxdghxcghcgcgjcjgcjgcghcgcgjcgjcgjcgjcgjcgjgjgjcjgcgjdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddhgfhgfrhfreuihreuiyrteuiyrteuiyerthyuiferhifigfgfsghkfhgdfkhgdfkhgfgdhgjkdfgjkhdfuhgfruyertyireiyteruyerouyifrhjuvdfjbldvklvcxbljvfsgoudflhgdfggljsfglgshlkgshkghlkghljgshjgskhgsgkhfgiysfgufruoyryuiterugefrjgvsfbjvsxljhbsvlkhvslihdgugorfegouefrihorgelihfgdlkbbdlbkhvbljgdfggougfhidfsg;khdfglhiglhgusgguvljbdgflhidgfougreugorfgihrgelihdrgugbfbfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfggfgfgfgfgfgfgfgfgfgfgfgfghydydydyfyfyfyfhfvhugfoihfgohgdfhlbgfhljbljncv ljnbvljnbgfnjbvmjkdjkodjodjodnojfbjiofbgopjigeopjighoputghpuigdfhpuidfsgihpugdfihymkjxvhljxvblkhx vbkhcx bkh cxkhbx cbkhx cbjkcx khb cxbjkcxbjkx ckhbcvxkhbcvbkhvckhbvxckhbvxckhbxcvhblkvxchbkcvxbkhxcvbkhxcvbkhcvxkhbxcvkhbxcvkhbxcvkhbxcvbjkhxcvbkhxcvbkhxcvkhbxcvbjkhcvxbjkhcvxkhbvxckhbcvxbkhcvxkhbcvxkhbjvxckhbvxckbjhcvxbjkhvxcbjkhcvxbjhjfhkfvdjhbcvjhbcvjhxc jhvx cjhvxcvvhcxkhxchvjxcjhvxcjhvxcvjhcxhvjxcjhvkjfufdudfiydfiy', style: TextStyle( fontSize: 16, fontWeight: FontWeight.w300))
+        Text(widget.carro.descricao,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+        SizedBox(
+          height: 12,
+        ),
+        StreamBuilder(
+          stream: _loripsumApiBloc.stream,
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (!snapshot.hasData) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+
+            return Text(snapshot.data,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w300));
+          },
+        )
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _loripsumApiBloc.dispose();
   }
 }
